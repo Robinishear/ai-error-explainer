@@ -18,7 +18,27 @@
         "title": "Hello World",
         "category": "AI Error Explainer"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "AI Error Explainer",
+      "properties": {
+        "aiErrorExplainer.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "“Your OpenRouter API key (get a free one from openrouter.ai).” "
+        },
+        "aiErrorExplainer.language": {
+          "type": "string",
+          "enum": [
+            "English",
+            "বাংলা",
+            "Hindi"
+          ],
+          "default": "English",
+          "description": "“Which language should the AI explanation be displayed in?”"
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "pnpm run package",
