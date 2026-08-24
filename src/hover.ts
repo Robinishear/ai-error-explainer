@@ -11,7 +11,6 @@ export function registerHoverProvider(): vscode.Disposable {
         return;
       }
 
-      // আশেপাশের কয়েক লাইন কোড নেওয়া (Security-এর জন্য পুরো ফাইল না)
       const startLine = Math.max(0, diagnostic.range.start.line - 3);
       const endLine = Math.min(
         document.lineCount - 1,
@@ -31,24 +30,23 @@ export function registerHoverProvider(): vscode.Disposable {
 
       const markdown = new vscode.MarkdownString();
       markdown.appendMarkdown(`### 🤖 AI Error Assistant\n\n`);
-      markdown.appendMarkdown(`⏳ *AI explanation লোড হচ্ছে...*`);
+      markdown.appendMarkdown(`⏳ *AI explanation is loading...*`);
 
-      // AI-কে কল করা (এটা একটু সময় নিতে পারে)
       const explanation = await explainError(
         diagnostic.message,
         codeSnippet,
         language,
       );
 
-      const finalMarkdown = new vscode.MarkdownString();
-      finalMarkdown.appendMarkdown(`### 🤖 AI Error Assistant\n\n`);
-      finalMarkdown.appendMarkdown(
-        `**কী হয়েছে?**\n${explanation.summary}\n\n`,
-      );
-      finalMarkdown.appendMarkdown(`**কেন হয়েছে?**\n${explanation.why}\n\n`);
-      finalMarkdown.appendMarkdown(`**সমাধান:**\n${explanation.fix}`);
+     const finalMarkdown = new vscode.MarkdownString();
+     finalMarkdown.appendMarkdown(`### 🤖 AI Error Assistant\n\n`);
+     finalMarkdown.appendMarkdown(
+       `**What happened?**\n${explanation.summary}\n\n`,
+     );
+     finalMarkdown.appendMarkdown(`**Why?**\n${explanation.why}\n\n`);
+     finalMarkdown.appendMarkdown(`**Fix:**\n${explanation.fix}`);
 
-      return new vscode.Hover(finalMarkdown, diagnostic.range);
+     return new vscode.Hover(finalMarkdown, diagnostic.range);
     },
   });
 }
