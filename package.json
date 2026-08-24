@@ -22,20 +22,59 @@
     "configuration": {
       "title": "AI Error Explainer",
       "properties": {
+        "aiErrorExplainer.provider": {
+          "type": "string",
+          "enum": [
+            "openrouter",
+            "openai",
+            "gemini",
+            "anthropic",
+            "deepseek"
+          ],
+          "enumDescriptions": [
+            "OpenRouter (access any model, free or paid)",
+            "OpenAI (GPT models)",
+            "Google Gemini",
+            "Anthropic (Claude)",
+            "DeepSeek"
+          ],
+          "default": "openrouter",
+          "description": "Which AI provider to use — pick based on which API key you have"
+        },
         "aiErrorExplainer.apiKey": {
           "type": "string",
           "default": "",
-          "description": "“Your OpenRouter API key (get a free one from openrouter.ai).” "
+          "description": "Your API key for the selected provider above"
+        },
+        "aiErrorExplainer.openrouterModel": {
+          "type": "string",
+          "default": "nvidia/nemotron-3.5-lightning:free",
+          "description": "Only used when provider = openrouter. Any OpenRouter model ID (e.g. openai/gpt-4o, anthropic/claude-3.5-sonnet, deepseek/deepseek-chat)"
         },
         "aiErrorExplainer.language": {
           "type": "string",
           "enum": [
             "English",
             "বাংলা",
-            "Hindi"
+            "Hindi",
+            "Urdu",
+            "Arabic",
+            "Persian",
+            "Chinese",
+            "Japanese",
+            "Korean",
+            "Spanish",
+            "French",
+            "German",
+            "Portuguese",
+            "Russian",
+            "Turkish",
+            "Indonesian",
+            "Tamil",
+            "Vietnamese"
           ],
           "default": "English",
-          "description": "“Which language should the AI explanation be displayed in?”"
+          "description": "Which language should the AI explanation be displayed in?"
         }
       }
     }

@@ -12,5 +12,5 @@
   "js/ts.tsc.autoDetect": "off",
   "prisma-smart-formatter.typescript.defaultFormatter": "esbenp.prettier-vscode",
   "prisma-smart-formatter.typescriptreact.defaultFormatter": "esbenp.prettier-vscode",
-  "cSpell.words": ["openrouter"]
+  "cSpell.words": ["aistudio", "deepseek", "nemotron", "openrouter"]
 }
