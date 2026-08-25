@@ -1,71 +1,35 @@
-# ai-error-explainer README
+# AI Error Explainer
 
-This is the README for your extension "ai-error-explainer". After writing up a brief description, we recommend including the following sections.
+AI-powered error explanations, right inside VS Code. Hover over any error or warning to get a clear explanation of what went wrong, why it happened, and how to fix it — with a one-click "Apply Fix" button.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+- 🔍 **Automatic error detection** — works with any language VS Code already understands (TypeScript, JavaScript, Python, and more)
+- 🤖 **AI-powered explanations** — plain-language breakdown of what happened, why, and how to fix it
+- ✅ **One-click Apply Fix** — apply the AI's suggested fix directly to your code
+- 🌍 **18 languages supported** — get explanations in English, বাংলা, Hindi, Urdu, Arabic, and more
+- 🔑 **Bring Your Own Key (BYOK)** — use your own API key from any supported provider; you're never dependent on ours
 
-For example if there is an image subfolder under your extension project workspace:
+## Supported AI Providers
 
-\!\[feature X\]\(images/feature-x.png\)
+Use whichever AI you already have access to:
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+| Provider | Get a free key |
+|---|---|
+| OpenRouter | [openrouter.ai/keys](https://openrouter.ai/keys) |
+| Google Gemini | [aistudio.google.com/apikey](https://aistudio.google.com/apikey) |
+| OpenAI | [platform.openai.com/api-keys](https://platform.openai.com/api-keys) |
+| Anthropic (Claude) | [console.anthropic.com](https://console.anthropic.com) |
+| DeepSeek | [platform.deepseek.com](https://platform.deepseek.com) |
 
-## Requirements
+## Setup
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+1. Install the extension
+2. Get a free API key from any provider in the table above
+3. Open VS Code Settings (`Ctrl+,`) and search for **"AI Error Explainer"**
+4. Set **Provider** to match your key's source
+5. Paste your key into **Api Key**
+6. (Optional) Set your preferred **Language**
+7. Hover over any red or yellow underline in your code — that's it!
 
-## Extension Settings
-
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+## How it works
