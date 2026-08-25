@@ -37,8 +37,7 @@ Code:
 ${codeSnippet}
 
 Return JSON with exactly these keys: summary, why, fix, fixedCode.
-"fixedCode" should be the corrected version of the exact line(s) that caused the error, ready to replace the original code directly. If you cannot confidently provide a fix, set fixedCode to an empty string.
-Respond in ${language}.`;
+"fixedCode" must be the COMPLETE corrected version of the ENTIRE code block shown above (all lines, not just the error line), preserving all surrounding code exactly as-is except for the fix. It must have the same number of lines as the original snippet unless the fix requires adding/removing a line.Respond in ${language}.`;
 }
 
 // ---------- AI Response Parsing ----------
