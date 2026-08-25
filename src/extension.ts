@@ -12,7 +12,7 @@ export function activate(context: vscode.ExtensionContext) {
   const hoverDisposable = registerHoverProvider();
   context.subscriptions.push(hoverDisposable);
 
-  const disposable = vscode.commands.registerCommand(
+  const helloDisposable = vscode.commands.registerCommand(
     "ai-error-explainer.helloWorld",
     () => {
       vscode.window.showInformationMessage(
@@ -20,8 +20,46 @@ export function activate(context: vscode.ExtensionContext) {
       );
     },
   );
+  context.subscriptions.push(helloDisposable);
 
-  context.subscriptions.push(disposable);
+  // ---------- Command to apply the fix ----------
+  const applyFixDisposable = vscode.commands.registerCommand(
+    "ai-error-explainer.applyFix",
+    async (
+      uriString: string,
+      startLine: number,
+      endLine: number,
+      fixedCode: string,
+    ) => {
+
+      // Convert the URI string back to a vscode.Uri
+      const uri = vscode.Uri.parse(uriString);
+      const editor = await vscode.window.showTextDocument(uri);
+      const document = editor.document;
+
+      // Check if the document has changed since the hover was generated
+      if (endLine >= document.lineCount) {
+        vscode.window.showErrorMessage(
+          "Cannot apply fix: the file has changed since this suggestion was generated. Please hover again.",
+        );
+        return;
+      }
+
+      const range = new vscode.Range(
+        startLine,
+        0,
+        endLine,
+        document.lineAt(endLine).text.length,
+      );
+
+      await editor.edit((editBuilder) => {
+        editBuilder.replace(range, fixedCode);
+      });
+
+      vscode.window.showInformationMessage("Fix applied!");
+    },
+  );
+  context.subscriptions.push(applyFixDisposable);
 }
 
 export function deactivate() {}

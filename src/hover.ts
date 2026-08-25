@@ -16,6 +16,7 @@ export function registerHoverProvider(): vscode.Disposable {
         document.lineCount - 1,
         diagnostic.range.end.line + 3,
       );
+
       const codeSnippet = document.getText(
         new vscode.Range(
           startLine,
@@ -24,6 +25,13 @@ export function registerHoverProvider(): vscode.Disposable {
           document.lineAt(endLine).text.length,
         ),
       );
+
+      // Limit the code snippet length to avoid overwhelming the AI model 
+      const MAX_SNIPPET_LENGTH = 1000;
+      const trimmedSnippet =
+        codeSnippet.length > MAX_SNIPPET_LENGTH
+          ? codeSnippet.slice(0, MAX_SNIPPET_LENGTH) + "\n... (truncated)"
+          : codeSnippet;
 
       const config = vscode.workspace.getConfiguration("aiErrorExplainer");
       const language = config.get<string>("language") || "English";
@@ -34,19 +42,35 @@ export function registerHoverProvider(): vscode.Disposable {
 
       const explanation = await explainError(
         diagnostic.message,
-        codeSnippet,
+        trimmedSnippet,
         language,
       );
 
-     const finalMarkdown = new vscode.MarkdownString();
-     finalMarkdown.appendMarkdown(`### 🤖 AI Error Assistant\n\n`);
-     finalMarkdown.appendMarkdown(
-       `**What happened?**\n${explanation.summary}\n\n`,
-     );
-     finalMarkdown.appendMarkdown(`**Why?**\n${explanation.why}\n\n`);
-     finalMarkdown.appendMarkdown(`**Fix:**\n${explanation.fix}`);
+      const finalMarkdown = new vscode.MarkdownString();
+      finalMarkdown.isTrusted = true; // command link 
+      finalMarkdown.appendMarkdown(`### 🤖 AI Error Assistant\n\n`);
+      finalMarkdown.appendMarkdown(
+        `**What happened?**\n${explanation.summary}\n\n`,
+      );
+      finalMarkdown.appendMarkdown(`**Why?**\n${explanation.why}\n\n`);
+      finalMarkdown.appendMarkdown(`**Fix:**\n${explanation.fix}`);
 
-     return new vscode.Hover(finalMarkdown, diagnostic.range);
+// Add the "Apply Fix" link if a fixedCode is provided
+      if (explanation.fixedCode && explanation.fixedCode.trim().length > 0) {
+        const args = encodeURIComponent(
+          JSON.stringify([
+            document.uri.toString(),
+            startLine,
+            endLine,
+            explanation.fixedCode,
+          ]),
+        );
+        finalMarkdown.appendMarkdown(
+          `\n\n[✅ Apply Fix](command:ai-error-explainer.applyFix?${args})`,
+        );
+      }
+
+      return new vscode.Hover(finalMarkdown, diagnostic.range);
     },
   });
 }

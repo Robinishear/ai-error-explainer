@@ -4,6 +4,7 @@ export interface AIExplanation {
   summary: string;
   why: string;
   fix: string;
+  fixedCode?: string;
 }
 
 interface OpenAIStyleResponse {
@@ -35,15 +36,33 @@ Error: ${errorMessage}
 Code:
 ${codeSnippet}
 
-Return JSON with exactly these keys: summary, why, fix.
+Return JSON with exactly these keys: summary, why, fix, fixedCode.
+"fixedCode" should be the corrected version of the exact line(s) that caused the error, ready to replace the original code directly. If you cannot confidently provide a fix, set fixedCode to an empty string.
 Respond in ${language}.`;
 }
 
+// ---------- AI Response Parsing ----------
 function parseAIText(text: string): AIExplanation {
   const cleaned = text.replace(/```json|```/g, "").trim();
-  return JSON.parse(cleaned);
+
+  try {
+    const parsed = JSON.parse(cleaned);
+
+    if (parsed.summary && parsed.why && parsed.fix) {
+      return parsed;
+    }
+
+    throw new Error("AI response is missing required fields");
+  } catch {
+    return {
+      summary: text.length > 300 ? text.slice(0, 300) + "..." : text,
+      why: "The AI didn't return properly formatted data, so the raw response is shown above.",
+      fix: "Try hovering again, or switch to a different model/provider in Settings.",
+    };
+  }
 }
 
+// ---------- Type Guards ----------
 function isErrorResponse(data: unknown): data is ErrorResponse {
   return typeof data === "object" && data !== null && "error" in data;
 }
