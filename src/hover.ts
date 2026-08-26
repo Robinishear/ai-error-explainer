@@ -1,6 +1,12 @@
 import * as vscode from "vscode";
 import { explainError } from "./ai";
 
+function safeEncode(obj: unknown): string {
+  return encodeURIComponent(JSON.stringify(obj))
+    .replace(/\(/g, "%28")
+    .replace(/\)/g, "%29");
+}
+
 export function registerHoverProvider(): vscode.Disposable {
   return vscode.languages.registerHoverProvider("*", {
     async provideHover(document, position) {
@@ -55,32 +61,10 @@ export function registerHoverProvider(): vscode.Disposable {
       finalMarkdown.appendMarkdown(`**Fix:**\n${explanation.fix}`);
 
       // Add the "View Details" link to open the diagnosis panel
-      const showPanelArgs = encodeURIComponent(
-        JSON.stringify([
-          JSON.stringify(explanation),
-          document.uri.toString(),
-          startLine,
-          endLine,
-        ]),
-      );
+      const showPanelArgs = safeEncode([JSON.stringify(explanation)]);
       finalMarkdown.appendMarkdown(
         `\n\n[🔍 View Details](command:ai-error-explainer.showPanel?${showPanelArgs})`,
       );
-
-      // Add the "Apply Fix" link if a fixedCode is provided
-      if (explanation.fixedCode && explanation.fixedCode.trim().length > 0) {
-        const args = encodeURIComponent(
-          JSON.stringify([
-            document.uri.toString(),
-            startLine,
-            endLine,
-            explanation.fixedCode,
-          ]),
-        );
-        finalMarkdown.appendMarkdown(
-          ` &nbsp; [✅ Apply Fix](command:ai-error-explainer.applyFix?${args})`,
-        );
-      }
 
       return new vscode.Hover(finalMarkdown, diagnostic.range);
     },

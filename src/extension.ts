@@ -25,53 +25,12 @@ export function activate(context: vscode.ExtensionContext) {
   );
   context.subscriptions.push(helloDisposable);
 
-  // ---------- Command to apply the fix ----------
-  const applyFixDisposable = vscode.commands.registerCommand(
-    "ai-error-explainer.applyFix",
-    async (
-      uriString: string,
-      startLine: number,
-      endLine: number,
-      fixedCode: string,
-    ) => {
-      const uri = vscode.Uri.parse(uriString);
-      const editor = await vscode.window.showTextDocument(uri);
-      const document = editor.document;
-
-      if (endLine >= document.lineCount) {
-        vscode.window.showErrorMessage(
-          "Cannot apply fix: the file has changed since this suggestion was generated. Please hover again.",
-        );
-        return;
-      }
-
-      const range = new vscode.Range(
-        startLine,
-        0,
-        endLine,
-        document.lineAt(endLine).text.length,
-      );
-
-      await editor.edit((editBuilder) => {
-        editBuilder.replace(range, fixedCode);
-      });
-
-      vscode.window.showInformationMessage("Fix applied!");
-    },
-  );
-  context.subscriptions.push(applyFixDisposable);
-
   // ---------- Command to open the diagnosis panel ----------
   const showPanelDisposable = vscode.commands.registerCommand(
     "ai-error-explainer.showPanel",
-    (
-      explanationJson: string,
-      uriString: string,
-      startLine: number,
-      endLine: number,
-    ) => {
+    (explanationJson: string) => {
       const explanation = JSON.parse(explanationJson);
-      showDiagnosisPanel(explanation, uriString, startLine, endLine);
+      showDiagnosisPanel(explanation);
     },
   );
   context.subscriptions.push(showPanelDisposable);

@@ -8,12 +8,7 @@ export function initWebview(uri: vscode.Uri) {
   extensionUri = uri;
 }
 
-export function showDiagnosisPanel(
-  explanation: AIExplanation,
-  uriString: string,
-  startLine: number,
-  endLine: number,
-) {
+export function showDiagnosisPanel(explanation: AIExplanation) {
   if (currentPanel) {
     currentPanel.reveal(vscode.ViewColumn.Beside);
   } else {
@@ -22,33 +17,13 @@ export function showDiagnosisPanel(
       "AI Diagnosis",
       vscode.ViewColumn.Beside,
       {
-        enableScripts: true,
-        localResourceRoots: [
-          vscode.Uri.joinPath(
-            extensionUri,
-            "node_modules",
-            "@vscode/codicons",
-            "dist",
-          ),
-        ],
+        enableScripts: false,
+        localResourceRoots: [vscode.Uri.joinPath(extensionUri, "media")],
       },
     );
 
     currentPanel.onDidDispose(() => {
       currentPanel = undefined;
-    });
-
-    currentPanel.webview.onDidReceiveMessage((message) => {
-      if (message.command === "applyFix") {
-        vscode.commands.executeCommand(
-          "ai-error-explainer.applyFix",
-          uriString,
-          startLine,
-          endLine,
-          message.fixedCode,
-        );
-        currentPanel?.dispose();
-      }
     });
   }
 
@@ -67,17 +42,8 @@ function buildHtml(
   webview: vscode.Webview,
 ): string {
   const codiconsUri = webview.asWebviewUri(
-    vscode.Uri.joinPath(
-      extensionUri,
-      "node_modules",
-      "@vscode/codicons",
-      "dist",
-      "codicon.css",
-    ),
+    vscode.Uri.joinPath(extensionUri, "media", "codicon.css"),
   );
-
-  const hasFix =
-    explanation.fixedCode && explanation.fixedCode.trim().length > 0;
 
   return `<!DOCTYPE html>
 <html>
@@ -102,50 +68,22 @@ function buildHtml(
   }
   .badge.detected { background: #501313; color: #f7c1c1; }
   .badge.diagnosed { background: #412402; color: #fac775; }
-  .badge.fixready { background: #04342c; color: #5dcaa5; }
-  .section { margin-bottom: 1rem; }
+  .section { margin-bottom: 1.25rem; }
   .label {
-    font-size: 11px;
+    font-size: 12px;
     color: #9ca3af;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
     display: flex;
     align-items: center;
     gap: 6px;
   }
-  .value { font-size: 14px; color: #e5e7eb; line-height: 1.5; }
-  .code-box {
-    background: #232730;
-    border-radius: 8px;
-    padding: 10px 12px;
-    margin-bottom: 1rem;
-    font-family: var(--vscode-editor-font-family);
-    font-size: 13px;
-    color: #5eead4;
-    white-space: pre-wrap;
-  }
-  button {
-    width: 100%;
-    background: #5eead4;
-    color: #04342c;
-    border: none;
-    border-radius: 8px;
-    padding: 10px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-  }
-  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .value { font-size: 14px; color: #e5e7eb; line-height: 1.6; }
 </style>
 </head>
 <body>
   <div class="badges">
     <span class="badge detected"><i class="codicon codicon-bug"></i> detected</span>
     <span class="badge diagnosed"><i class="codicon codicon-lightbulb"></i> diagnosed</span>
-    ${hasFix ? '<span class="badge fixready"><i class="codicon codicon-check"></i> fix ready</span>' : ""}
   </div>
 
   <div class="section">
@@ -162,22 +100,6 @@ function buildHtml(
     <div class="label"><i class="codicon codicon-tools"></i> prescription</div>
     <div class="value">${escapeHtml(explanation.fix)}</div>
   </div>
-
-  ${hasFix ? `<div class="code-box">${escapeHtml(explanation.fixedCode!)}</div>` : ""}
-
-  <button id="applyBtn" ${hasFix ? "" : "disabled"}>
-    <i class="codicon codicon-check"></i> apply fix
-  </button>
-
-  <script>
-    const vscode = acquireVsCodeApi();
-    document.getElementById('applyBtn').addEventListener('click', () => {
-      vscode.postMessage({
-        command: 'applyFix',
-        fixedCode: ${hasFix ? JSON.stringify(explanation.fixedCode) : "''"}
-      });
-    });
-  </script>
 </body>
 </html>`;
 }

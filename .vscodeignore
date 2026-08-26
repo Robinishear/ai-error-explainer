@@ -2,6 +2,9 @@
 .vscode-test/**
 out/**
 node_modules/**
+!node_modules/@vscode
+!node_modules/@vscode/codicons
+!node_modules/@vscode/codicons/**
 src/**
 .gitignore
 .yarnrc
