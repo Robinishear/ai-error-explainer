@@ -2,7 +2,7 @@
   "name": "ai-error-explainer",
   "displayName": "ai-error-explainer",
   "description": "AI-powered error explanations on hover",
-  "version": "0.0.1",
+  "version": "1.2.0",
   "icon": "icon.png",
   "engines": {
     "vscode": "^1.133.0"
