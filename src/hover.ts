@@ -26,7 +26,6 @@ export function registerHoverProvider(): vscode.Disposable {
         ),
       );
 
-      // Limit the code snippet length to avoid overwhelming the AI model 
       const MAX_SNIPPET_LENGTH = 1000;
       const trimmedSnippet =
         codeSnippet.length > MAX_SNIPPET_LENGTH
@@ -47,7 +46,7 @@ export function registerHoverProvider(): vscode.Disposable {
       );
 
       const finalMarkdown = new vscode.MarkdownString();
-      finalMarkdown.isTrusted = true; // command link 
+      finalMarkdown.isTrusted = true;
       finalMarkdown.appendMarkdown(`### 🤖 AI Error Assistant\n\n`);
       finalMarkdown.appendMarkdown(
         `**What happened?**\n${explanation.summary}\n\n`,
@@ -55,7 +54,20 @@ export function registerHoverProvider(): vscode.Disposable {
       finalMarkdown.appendMarkdown(`**Why?**\n${explanation.why}\n\n`);
       finalMarkdown.appendMarkdown(`**Fix:**\n${explanation.fix}`);
 
-// Add the "Apply Fix" link if a fixedCode is provided
+      // Add the "View Details" link to open the diagnosis panel
+      const showPanelArgs = encodeURIComponent(
+        JSON.stringify([
+          JSON.stringify(explanation),
+          document.uri.toString(),
+          startLine,
+          endLine,
+        ]),
+      );
+      finalMarkdown.appendMarkdown(
+        `\n\n[🔍 View Details](command:ai-error-explainer.showPanel?${showPanelArgs})`,
+      );
+
+      // Add the "Apply Fix" link if a fixedCode is provided
       if (explanation.fixedCode && explanation.fixedCode.trim().length > 0) {
         const args = encodeURIComponent(
           JSON.stringify([
@@ -66,7 +78,7 @@ export function registerHoverProvider(): vscode.Disposable {
           ]),
         );
         finalMarkdown.appendMarkdown(
-          `\n\n[✅ Apply Fix](command:ai-error-explainer.applyFix?${args})`,
+          ` &nbsp; [✅ Apply Fix](command:ai-error-explainer.applyFix?${args})`,
         );
       }
 

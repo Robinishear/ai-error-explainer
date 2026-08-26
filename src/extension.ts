@@ -1,11 +1,14 @@
 import * as vscode from "vscode";
 import { watchDiagnostics } from "./diagnostics";
 import { registerHoverProvider } from "./hover";
+import { showDiagnosisPanel, initWebview } from "./webviewPanel";
 
 export function activate(context: vscode.ExtensionContext) {
   console.log(
     'Congratulations, your extension "ai-error-explainer" is now active!',
   );
+
+  initWebview(context.extensionUri);
 
   watchDiagnostics(context);
 
@@ -31,13 +34,10 @@ export function activate(context: vscode.ExtensionContext) {
       endLine: number,
       fixedCode: string,
     ) => {
-
-      // Convert the URI string back to a vscode.Uri
       const uri = vscode.Uri.parse(uriString);
       const editor = await vscode.window.showTextDocument(uri);
       const document = editor.document;
 
-      // Check if the document has changed since the hover was generated
       if (endLine >= document.lineCount) {
         vscode.window.showErrorMessage(
           "Cannot apply fix: the file has changed since this suggestion was generated. Please hover again.",
@@ -60,6 +60,21 @@ export function activate(context: vscode.ExtensionContext) {
     },
   );
   context.subscriptions.push(applyFixDisposable);
+
+  // ---------- Command to open the diagnosis panel ----------
+  const showPanelDisposable = vscode.commands.registerCommand(
+    "ai-error-explainer.showPanel",
+    (
+      explanationJson: string,
+      uriString: string,
+      startLine: number,
+      endLine: number,
+    ) => {
+      const explanation = JSON.parse(explanationJson);
+      showDiagnosisPanel(explanation, uriString, startLine, endLine);
+    },
+  );
+  context.subscriptions.push(showPanelDisposable);
 }
 
 export function deactivate() {}
