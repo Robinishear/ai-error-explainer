@@ -24,6 +24,7 @@ Hover over any error or warning to get a clear, plain-language diagnosis of what
 - [FAQ](#-faq)
 - [Known Limitations](#-known-limitations)
 - [License](#-license)
+- [Author](#-author)
 
 ---
 
@@ -167,4 +168,12 @@ No — that message comes directly from your provider's free tier limit, not fro
 
 ## 📄 License
 
-MIT — free to use, modify, and share.
+MIT — free to use, modify, and share. See the [LICENSE](LICENSE) file for details.
+
+---
+
+## 👤 Author
+
+Built by **Robin Ryan**, a full-stack developer from Bangladesh.
+
+If you run into an issue or have a feature request, feel free to leave a review or rating on the Marketplace listing — feedback helps shape future updates.
