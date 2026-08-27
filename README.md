@@ -49,7 +49,7 @@ This extension follows one core principle: **bring your own key**. There's no su
 
 ---
 
-## 🔌 Supported AI Providers
+## Supported AI Providers
 
 Use whichever AI you already have access to — free or paid:
 
