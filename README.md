@@ -1,4 +1,4 @@
-# 🤖 AI Error Explainer
+# AI Error Explainer
 
 **AI-powered error explanations, right inside VS Code.**
 
@@ -11,7 +11,7 @@ Hover over any error or warning to get a clear, plain-language diagnosis of what
 
 ---
 
-## 📑 Table of Contents
+## Table of Contents
 
 - [Why This Extension?](#-why-this-extension)
 - [Features](#-features)
@@ -28,7 +28,7 @@ Hover over any error or warning to get a clear, plain-language diagnosis of what
 
 ---
 
-## 💡 Why This Extension?
+## Why This Extension?
 
 Cryptic error messages waste time. Instead of copy-pasting errors into a browser tab and searching through forum posts, get an instant, plain-language diagnosis without ever leaving your editor.
 
@@ -36,16 +36,16 @@ This extension follows one core principle: **bring your own key**. There's no su
 
 ---
 
-## ✨ Features
+## Features
 
 | | |
 |---|---|
-| 🔍 **Automatic error detection** | Works with any language VS Code already understands — TypeScript, JavaScript, Python, Go, and more |
-| 🤖 **AI-powered explanations** | Plain-language breakdown: what happened, why, and how to fix it |
-| 🩺 **Detailed diagnosis panel** | Click "View Details" for a clean, dedicated breakdown of the full diagnosis |
-| 🌍 **18 languages supported** | English, বাংলা, Hindi, Urdu, Arabic, Chinese, Japanese, Spanish, and more |
-| 🔑 **Bring Your Own Key (BYOK)** | Use any provider's API key — you're never dependent on ours, and you never pay us |
-| 🔒 **Zero data collection** | Nothing is logged, stored, or sent anywhere except the AI provider you configure |
+|  **Automatic error detection** | Works with any language VS Code already understands — TypeScript, JavaScript, Python, Go, and more |
+|  **AI-powered explanations** | Plain-language breakdown: what happened, why, and how to fix it |
+|  **Detailed diagnosis panel** | Click "View Details" for a clean, dedicated breakdown of the full diagnosis |
+|  **18 languages supported** | English, বাংলা, Hindi, Urdu, Arabic, Chinese, Japanese, Spanish, and more |
+| **Bring Your Own Key (BYOK)** | Use any provider's API key — you're never dependent on ours, and you never pay us |
+| **Zero data collection** | Nothing is logged, stored, or sent anywhere except the AI provider you configure |
 
 ---
 
@@ -65,7 +65,7 @@ Already have a subscription to one of these? You can use the same API key here �
 
 ---
 
-## 📸 Example
+## Example
 
 **Before** — you hit a confusing error:
 
@@ -76,19 +76,19 @@ Already have a subscription to one of these? You can use the same API key here �
 
 **Hover over the red underline**, and AI Error Explainer instantly shows:
 
-> 🤖 **AI Error Assistant**
+> **AI Error Assistant**
 >
 > **What happened?** The `users` variable is undefined.
 > **Why?** `getUsers()` did not return an array.
 > **Fix:** Make sure `getUsers()` returns an array, or add a fallback like `getUsers() || []`.
 >
-> 🔍 **View Details**
+>  **View Details**
 
 Click **View Details** to open a dedicated side panel with a clean, full breakdown — no squinting at a tiny tooltip.
 
 ---
 
-## ⚙️ Setup
+## Setup
 
 1. **Install** the extension from the VS Code Marketplace
 2. **Get a free API key** from any provider in the table above
@@ -100,7 +100,7 @@ Click **View Details** to open a dedicated side panel with a clean, full breakdo
 
 ---
 
-## 🔄 How It Works
+## How It Works
 
     Your code
        ↓
@@ -118,7 +118,7 @@ Only a small snippet — the error message and a few surrounding lines — is ev
 
 ---
 
-## 🛠️ Settings Reference
+## Settings Reference
 
 | Setting | Description | Default |
 |---|---|---|
@@ -129,7 +129,7 @@ Only a small snippet — the error message and a few surrounding lines — is ev
 
 ---
 
-## 🔐 Privacy & Security
+## Privacy & Security
 
 - ✅ **No data is collected or stored by this extension.** Nothing is sent to any server we control — there is no "we" in the data path at all.
 - ✅ **Your API key never leaves your machine** except to talk directly to the provider you chose. It's stored in VS Code's local settings, same as any other extension setting.
@@ -139,7 +139,7 @@ Only a small snippet — the error message and a few surrounding lines — is ev
 
 ---
 
-## ❓ FAQ
+## FAQ
 
 **Is this free to use?**
 The extension itself is completely free. Whether *using it* is free depends on your chosen AI provider — OpenRouter and Gemini both offer generous free tiers.
@@ -158,7 +158,7 @@ No — that message comes directly from your provider's free tier limit, not fro
 
 ---
 
-## ⚠️ Known Limitations
+## Known Limitations
 
 - Free-tier AI models may respond more slowly or hit rate limits depending on the provider and time of day
 - Very large code blocks are truncated before being sent to the AI to keep requests fast and affordable
@@ -166,13 +166,12 @@ No — that message comes directly from your provider's free tier limit, not fro
 
 ---
 
-## 📄 License
+## License
 
-MIT — free to use, modify, and share. See the [LICENSE](LICENSE) file for details.
-
+MIT — free to use, modify, and share. See the LICENSE file included with this extension for details.
 ---
 
-## 👤 Author
+## Author
 
 Built by **Robin Ryan**, a full-stack developer from Bangladesh.
 
