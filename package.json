@@ -1,5 +1,6 @@
 {
   "name": "ai-error-explainer",
+  "publisher": "robinishear",
   "displayName": "ai-error-explainer",
   "description": "AI-powered error explanations on hover",
   "version": "1.2.0",
