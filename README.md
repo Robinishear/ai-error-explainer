@@ -43,7 +43,7 @@ This extension follows one core principle: **bring your own key**. There's no su
 |  **Automatic error detection** | Works with any language VS Code already understands — TypeScript, JavaScript, Python, Go, and more |
 |  **AI-powered explanations** | Plain-language breakdown: what happened, why, and how to fix it |
 |  **Detailed diagnosis panel** | Click "View Details" for a clean, dedicated breakdown of the full diagnosis |
-|  **18 languages supported** | English, বাংলা, Hindi, Urdu, Arabic, Chinese, Japanese, Spanish, and more |
+|  **42 languages supported** | English, বাংলা, Hindi, Urdu, Arabic, Chinese, Japanese, Spanish, and more |
 | **Bring Your Own Key (BYOK)** | Use any provider's API key — you're never dependent on ours, and you never pay us |
 | **Zero data collection** | Nothing is logged, stored, or sent anywhere except the AI provider you configure |
 
@@ -125,7 +125,7 @@ Only a small snippet — the error message and a few surrounding lines — is ev
 | `aiErrorExplainer.provider` | Which AI provider to use: `openrouter`, `openai`, `gemini`, `anthropic`, or `deepseek` | `openrouter` |
 | `aiErrorExplainer.apiKey` | Your API key for the selected provider | *(empty)* |
 | `aiErrorExplainer.openrouterModel` | Which model to use when provider is `openrouter` | `nvidia/nemotron-3.5-lightning:free` |
-| `aiErrorExplainer.language` | Language for AI explanations (18 supported) | `English` |
+| `aiErrorExplainer.language` | Language for AI explanations (42 supported) | `English` |
 
 ---
 
