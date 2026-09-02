@@ -4,7 +4,6 @@ export interface AIExplanation {
   summary: string;
   why: string;
   fix: string;
-  fixedCode?: string;
 }
 
 interface OpenAIStyleResponse {
@@ -23,6 +22,17 @@ interface ErrorResponse {
   error: { message: string; code?: number };
 }
 
+const responseCache = new Map<string, AIExplanation>();
+
+function generateCacheKey(
+  errorMessage: string,
+  codeSnippet: string,
+  language: string,
+  provider: string,
+): string {
+  return provider + "::" + language + "::" + errorMessage + "::" + codeSnippet;
+}
+
 function buildPrompt(
   errorMessage: string,
   codeSnippet: string,
@@ -30,27 +40,24 @@ function buildPrompt(
 ): string {
   return `You are a programming error explainer.
 Respond ONLY with valid JSON, no markdown fences, no extra text.
+Keep each field to 1-2 short sentences maximum.
 
 Error: ${errorMessage}
 
 Code:
 ${codeSnippet}
 
-Return JSON with exactly these keys: summary, why, fix, fixedCode.
-"fixedCode" must be the COMPLETE corrected version of the ENTIRE code block shown above (all lines, not just the error line), preserving all surrounding code exactly as-is except for the fix. It must have the same number of lines as the original snippet unless the fix requires adding/removing a line.Respond in ${language}.`;
+Return JSON with exactly these keys: summary, why, fix.
+Respond in ${language}.`;
 }
 
-// ---------- AI Response Parsing ----------
 function parseAIText(text: string): AIExplanation {
   const cleaned = text.replace(/```json|```/g, "").trim();
-
   try {
     const parsed = JSON.parse(cleaned);
-
     if (parsed.summary && parsed.why && parsed.fix) {
       return parsed;
     }
-
     throw new Error("AI response is missing required fields");
   } catch {
     return {
@@ -61,12 +68,10 @@ function parseAIText(text: string): AIExplanation {
   }
 }
 
-// ---------- Type Guards ----------
 function isErrorResponse(data: unknown): data is ErrorResponse {
   return typeof data === "object" && data !== null && "error" in data;
 }
 
-// ---------- OpenRouter ----------
 async function callOpenRouter(
   apiKey: string,
   prompt: string,
@@ -82,33 +87,23 @@ async function callOpenRouter(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
+        Authorization: "Bearer " + apiKey,
       },
       body: JSON.stringify({
-        model,
+        model: model,
         messages: [{ role: "user", content: prompt }],
       }),
     },
   );
 
   const data: unknown = await response.json();
-
   if (isErrorResponse(data)) {
-    return {
-      summary:
-        data.error.code === 429
-          ? "Daily free request limit reached."
-          : "AI request failed.",
-      why: data.error.message,
-      fix: "Wait for the limit to reset, or switch provider/model in Settings.",
-    };
+    throw new Error(data.error.message);
   }
-
   const result = data as OpenAIStyleResponse;
   return parseAIText(result.choices[0].message.content);
 }
 
-// ---------- OpenAI ----------
 async function callOpenAI(
   apiKey: string,
   prompt: string,
@@ -117,7 +112,7 @@ async function callOpenAI(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
+      Authorization: "Bearer " + apiKey,
     },
     body: JSON.stringify({
       model: "gpt-4o-mini",
@@ -126,48 +121,35 @@ async function callOpenAI(
   });
 
   const data: unknown = await response.json();
-
   if (isErrorResponse(data)) {
-    return {
-      summary: "AI request failed.",
-      why: data.error.message,
-      fix: "Check your OpenAI API key and billing status.",
-    };
+    throw new Error(data.error.message);
   }
-
   const result = data as OpenAIStyleResponse;
   return parseAIText(result.choices[0].message.content);
 }
 
-// ---------- Google Gemini ----------
 async function callGemini(
   apiKey: string,
   prompt: string,
 ): Promise<AIExplanation> {
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
-    },
-  );
+  const url =
+    "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=" +
+    apiKey;
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
+  });
 
   const data: unknown = await response.json();
-
   if (isErrorResponse(data)) {
-    return {
-      summary: "AI request failed.",
-      why: data.error.message,
-      fix: "Check your Gemini API key.",
-    };
+    throw new Error(data.error.message);
   }
-
   const result = data as GeminiResponse;
   return parseAIText(result.candidates[0].content.parts[0].text);
 }
 
-// ---------- Anthropic (Claude) ----------
 async function callAnthropic(
   apiKey: string,
   prompt: string,
@@ -187,20 +169,13 @@ async function callAnthropic(
   });
 
   const data: unknown = await response.json();
-
   if (isErrorResponse(data)) {
-    return {
-      summary: "AI request failed.",
-      why: data.error.message,
-      fix: "Check your Anthropic API key.",
-    };
+    throw new Error(data.error.message);
   }
-
   const result = data as AnthropicResponse;
   return parseAIText(result.content[0].text);
 }
 
-// ---------- DeepSeek ----------
 async function callDeepSeek(
   apiKey: string,
   prompt: string,
@@ -209,7 +184,7 @@ async function callDeepSeek(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${apiKey}`,
+      Authorization: "Bearer " + apiKey,
     },
     body: JSON.stringify({
       model: "deepseek-chat",
@@ -218,57 +193,115 @@ async function callDeepSeek(
   });
 
   const data: unknown = await response.json();
-
   if (isErrorResponse(data)) {
-    return {
-      summary: "AI request failed.",
-      why: data.error.message,
-      fix: "Check your DeepSeek API key.",
-    };
+    throw new Error(data.error.message);
   }
-
   const result = data as OpenAIStyleResponse;
   return parseAIText(result.choices[0].message.content);
 }
 
-// ---------- Main entry point ----------
+const providerFunctions: Record<
+  string,
+  (apiKey: string, prompt: string) => Promise<AIExplanation>
+> = {
+  openrouter: callOpenRouter,
+  openai: callOpenAI,
+  gemini: callGemini,
+  anthropic: callAnthropic,
+  deepseek: callDeepSeek,
+};
+
+interface ProviderAttempt {
+  name: string;
+  apiKey: string;
+}
+
+function buildProviderList(): ProviderAttempt[] {
+  const config = vscode.workspace.getConfiguration("aiErrorExplainer");
+  const primaryProvider = config.get<string>("provider") || "openrouter";
+  const primaryKey = config.get<string>("apiKey") || "";
+
+  const fallbackKeys: Record<string, string> = {
+    openrouter: config.get<string>("openrouterApiKey") || "",
+    openai: config.get<string>("openaiApiKey") || "",
+    gemini: config.get<string>("geminiApiKey") || "",
+    anthropic: config.get<string>("anthropicApiKey") || "",
+    deepseek: config.get<string>("deepseekApiKey") || "",
+  };
+
+  const attempts: ProviderAttempt[] = [];
+
+  if (primaryKey) {
+    attempts.push({ name: primaryProvider, apiKey: primaryKey });
+  }
+
+  for (const key in fallbackKeys) {
+    if (fallbackKeys[key] && key !== primaryProvider) {
+      attempts.push({ name: key, apiKey: fallbackKeys[key] });
+    }
+  }
+
+  return attempts;
+}
+
 export async function explainError(
   errorMessage: string,
   codeSnippet: string,
   language: string,
 ): Promise<AIExplanation> {
   const config = vscode.workspace.getConfiguration("aiErrorExplainer");
-  const apiKey = config.get<string>("apiKey");
-  const provider = config.get<string>("provider") || "openrouter";
+  const primaryProvider = config.get<string>("provider") || "openrouter";
+  const enableFallback = config.get<boolean>("enableFallback");
 
-  if (!apiKey) {
+  const cacheKey = generateCacheKey(
+    errorMessage,
+    codeSnippet,
+    language,
+    primaryProvider,
+  );
+
+  const cached = responseCache.get(cacheKey);
+  if (cached) {
+    return cached;
+  }
+
+  const attempts = buildProviderList();
+
+  if (attempts.length === 0) {
     return {
       summary: "API key not set.",
-      why: `Go to Settings and set "AI Error Explainer: Api Key" for your chosen provider (${provider}).`,
+      why:
+        'Go to Settings and set "AI Error Explainer: Api Key" for your chosen provider (' +
+        primaryProvider +
+        ").",
       fix: "Get a key from openrouter.ai, platform.openai.com, aistudio.google.com, console.anthropic.com, or platform.deepseek.com.",
     };
   }
 
   const prompt = buildPrompt(errorMessage, codeSnippet, language);
+  const attemptsToTry =
+    enableFallback === false ? [attempts[0]] : attempts;
 
-  try {
-    switch (provider) {
-      case "openai":
-        return await callOpenAI(apiKey, prompt);
-      case "gemini":
-        return await callGemini(apiKey, prompt);
-      case "anthropic":
-        return await callAnthropic(apiKey, prompt);
-      case "deepseek":
-        return await callDeepSeek(apiKey, prompt);
-      default:
-        return await callOpenRouter(apiKey, prompt);
+  let lastError = "";
+
+  for (const attempt of attemptsToTry) {
+    const fn = providerFunctions[attempt.name];
+    if (!fn) {
+      continue;
     }
-  } catch (error) {
-    return {
-      summary: "No response was received from the AI.",
-      why: String(error),
-      fix: "Check your API key and internet connection.",
-    };
+
+    try {
+      const result = await fn(attempt.apiKey, prompt);
+      responseCache.set(cacheKey, result);
+      return result;
+    } catch (error) {
+      lastError = "[" + attempt.name + "] " + String(error);
+    }
   }
+
+  return {
+    summary: "All configured AI providers failed.",
+    why: lastError || "Unknown error.",
+    fix: "Check your API keys, or wait for rate limits to reset.",
+  };
 }

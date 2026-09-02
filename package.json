@@ -73,10 +73,64 @@
             "Turkish",
             "Indonesian",
             "Tamil",
-            "Vietnamese"
+            "Vietnamese",
+            "Malay",
+            "Thai",
+            "Telugu",
+            "Marathi",
+            "Gujarati",
+            "Punjabi",
+            "Kannada",
+            "Malayalam",
+            "Bengali",
+            "Dutch",
+            "Italian",
+            "Polish",
+            "Ukrainian",
+            "Romanian",
+            "Greek",
+            "Hebrew",
+            "Swedish",
+            "Danish",
+            "Norwegian",
+            "Finnish",
+            "Czech",
+            "Hungarian",
+            "Filipino",
+            "Swahili"
           ],
           "default": "English",
           "description": "Which language should the AI explanation be displayed in?"
+        },
+        "aiErrorExplainer.enableFallback": {
+          "type": "boolean",
+          "default": true,
+          "description": "If the primary provider fails or hits a rate limit, automatically try other providers with keys configured below"
+        },
+        "aiErrorExplainer.openrouterApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "(Optional, for fallback) Your OpenRouter API key"
+        },
+        "aiErrorExplainer.openaiApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "(Optional, for fallback) Your OpenAI API key"
+        },
+        "aiErrorExplainer.geminiApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "(Optional, for fallback) Your Gemini API key"
+        },
+        "aiErrorExplainer.anthropicApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "(Optional, for fallback) Your Anthropic API key"
+        },
+        "aiErrorExplainer.deepseekApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "(Optional, for fallback) Your DeepSeek API key"
         }
       }
     }
