@@ -22,15 +22,28 @@ interface ErrorResponse {
   error: { message: string; code?: number };
 }
 
+// ---------- Caching ----------
+// Session-only cache: cleared when VS Code restarts, never written to disk.
 const responseCache = new Map<string, AIExplanation>();
 
 function generateCacheKey(
   errorMessage: string,
   codeSnippet: string,
   language: string,
-  provider: string,
+  baseUrl: string,
+  model: string,
 ): string {
-  return provider + "::" + language + "::" + errorMessage + "::" + codeSnippet;
+  return (
+    baseUrl +
+    "::" +
+    model +
+    "::" +
+    language +
+    "::" +
+    errorMessage +
+    "::" +
+    codeSnippet
+  );
 }
 
 function buildPrompt(
@@ -63,7 +76,7 @@ function parseAIText(text: string): AIExplanation {
     return {
       summary: text.length > 300 ? text.slice(0, 300) + "..." : text,
       why: "The AI didn't return properly formatted data, so the raw response is shown above.",
-      fix: "Try hovering again, or switch to a different model/provider in Settings.",
+      fix: "Try hovering again, or check your Base URL and Model settings.",
     };
   }
 }
@@ -72,68 +85,54 @@ function isErrorResponse(data: unknown): data is ErrorResponse {
   return typeof data === "object" && data !== null && "error" in data;
 }
 
-async function callOpenRouter(
+//  Universal caller for any OpenAI-compatible provider 
+// Works with: OpenAI, DeepSeek, Groq, Mistral, OpenRouter, Together, xAI,
+// Fireworks, Cerebras, Perplexity, Ollama (local), and most others.
+async function callOpenAICompatible(
+  baseUrl: string,
   apiKey: string,
+  model: string,
   prompt: string,
 ): Promise<AIExplanation> {
-  const config = vscode.workspace.getConfiguration("aiErrorExplainer");
-  const model =
-    config.get<string>("openrouterModel") ||
-    "nvidia/nemotron-3.5-lightning:free";
-
-  const response = await fetch(
-    "https://openrouter.ai/api/v1/chat/completions",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + apiKey,
-      },
-      body: JSON.stringify({
-        model: model,
-        messages: [{ role: "user", content: prompt }],
-      }),
-    },
-  );
-
-  const data: unknown = await response.json();
-  if (isErrorResponse(data)) {
-    throw new Error(data.error.message);
-  }
-  const result = data as OpenAIStyleResponse;
-  return parseAIText(result.choices[0].message.content);
-}
-
-async function callOpenAI(
-  apiKey: string,
-  prompt: string,
-): Promise<AIExplanation> {
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+  const response = await fetch(baseUrl, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       Authorization: "Bearer " + apiKey,
     },
     body: JSON.stringify({
-      model: "gpt-4o-mini",
+      model: model,
       messages: [{ role: "user", content: prompt }],
     }),
   });
 
   const data: unknown = await response.json();
+
   if (isErrorResponse(data)) {
-    throw new Error(data.error.message);
+    return {
+      summary:
+        data.error.code === 429 ? "Rate limit reached." : "AI request failed.",
+      why: data.error.message,
+      fix: "Check your API key, Base URL, and Model name in Settings.",
+    };
   }
+
   const result = data as OpenAIStyleResponse;
   return parseAIText(result.choices[0].message.content);
 }
 
+//  Google Gemini (different format, needs its own function) 
+
 async function callGemini(
   apiKey: string,
+  model: string,
   prompt: string,
 ): Promise<AIExplanation> {
+  const geminiModel = model || "gemini-3.6-flash";
   const url =
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=" +
+    "https://generativelanguage.googleapis.com/v1beta/models/" +
+    geminiModel +
+    ":generateContent?key=" +
     apiKey;
 
   const response = await fetch(url, {
@@ -142,18 +141,41 @@ async function callGemini(
     body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
   });
 
-  const data: unknown = await response.json();
-  if (isErrorResponse(data)) {
-    throw new Error(data.error.message);
+  const rawText = await response.text();
+  console.log("Gemini response status:", response.status);
+  console.log("Gemini raw response:", rawText);
+
+  let data: unknown;
+  try {
+    data = JSON.parse(rawText);
+  } catch {
+    return {
+      summary: "Gemini returned an unreadable response.",
+      why: "HTTP " + response.status + ": " + (rawText || "(empty response)"),
+      fix: "Check your Gemini API key and internet connection.",
+    };
   }
+
+  if (isErrorResponse(data)) {
+    return {
+      summary: "AI request failed.",
+      why: data.error.message,
+      fix: "Check your Gemini API key and Model name in Settings.",
+    };
+  }
+
   const result = data as GeminiResponse;
   return parseAIText(result.candidates[0].content.parts[0].text);
 }
 
+// ---------- Anthropic Claude (different format, needs its own function) ----------
 async function callAnthropic(
   apiKey: string,
+  model: string,
   prompt: string,
 ): Promise<AIExplanation> {
+  const claudeModel = model || "claude-3-5-sonnet-20241022";
+
   const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
@@ -162,146 +184,92 @@ async function callAnthropic(
       "anthropic-version": "2023-06-01",
     },
     body: JSON.stringify({
-      model: "claude-3-5-sonnet-20241022",
+      model: claudeModel,
       max_tokens: 1024,
       messages: [{ role: "user", content: prompt }],
     }),
   });
 
   const data: unknown = await response.json();
+
   if (isErrorResponse(data)) {
-    throw new Error(data.error.message);
+    return {
+      summary: "AI request failed.",
+      why: data.error.message,
+      fix: "Check your Anthropic API key and Model name in Settings.",
+    };
   }
+
   const result = data as AnthropicResponse;
   return parseAIText(result.content[0].text);
 }
 
-async function callDeepSeek(
-  apiKey: string,
-  prompt: string,
-): Promise<AIExplanation> {
-  const response = await fetch("https://api.deepseek.com/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: "Bearer " + apiKey,
-    },
-    body: JSON.stringify({
-      model: "deepseek-chat",
-      messages: [{ role: "user", content: prompt }],
-    }),
-  });
-
-  const data: unknown = await response.json();
-  if (isErrorResponse(data)) {
-    throw new Error(data.error.message);
-  }
-  const result = data as OpenAIStyleResponse;
-  return parseAIText(result.choices[0].message.content);
-}
-
-const providerFunctions: Record<
-  string,
-  (apiKey: string, prompt: string) => Promise<AIExplanation>
-> = {
-  openrouter: callOpenRouter,
-  openai: callOpenAI,
-  gemini: callGemini,
-  anthropic: callAnthropic,
-  deepseek: callDeepSeek,
-};
-
-interface ProviderAttempt {
-  name: string;
-  apiKey: string;
-}
-
-function buildProviderList(): ProviderAttempt[] {
-  const config = vscode.workspace.getConfiguration("aiErrorExplainer");
-  const primaryProvider = config.get<string>("provider") || "openrouter";
-  const primaryKey = config.get<string>("apiKey") || "";
-
-  const fallbackKeys: Record<string, string> = {
-    openrouter: config.get<string>("openrouterApiKey") || "",
-    openai: config.get<string>("openaiApiKey") || "",
-    gemini: config.get<string>("geminiApiKey") || "",
-    anthropic: config.get<string>("anthropicApiKey") || "",
-    deepseek: config.get<string>("deepseekApiKey") || "",
-  };
-
-  const attempts: ProviderAttempt[] = [];
-
-  if (primaryKey) {
-    attempts.push({ name: primaryProvider, apiKey: primaryKey });
-  }
-
-  for (const key in fallbackKeys) {
-    if (fallbackKeys[key] && key !== primaryProvider) {
-      attempts.push({ name: key, apiKey: fallbackKeys[key] });
-    }
-  }
-
-  return attempts;
-}
-
+// ---------- Main entry point ----------
 export async function explainError(
   errorMessage: string,
   codeSnippet: string,
   language: string,
 ): Promise<AIExplanation> {
   const config = vscode.workspace.getConfiguration("aiErrorExplainer");
-  const primaryProvider = config.get<string>("provider") || "openrouter";
-  const enableFallback = config.get<boolean>("enableFallback");
+  const apiKey = config.get<string>("apiKey");
+  const apiFormat = config.get<string>("apiFormat") || "openai-compatible";
+  const baseUrl =
+    config.get<string>("baseUrl") ||
+    "https://openrouter.ai/api/v1/chat/completions";
+  // const model =
+  //   config.get<string>("model") || "nvidia/nemotron-3.5-lightning:free";
+
+  //  fix  new code
+  const rawModel = config.get<string>("model") || "";
+  const model =
+    rawModel ||
+    (apiFormat === "openai-compatible"
+      ? "nvidia/nemotron-3.5-lightning:free"
+      : "");
+
+  if (!apiKey) {
+    return {
+      summary: "API key not set.",
+      why: 'Go to Settings and set "AI Error Explainer: Api Key" for your provider.',
+      fix: "Also make sure Base URL / Model (or API Format) match your provider.",
+    };
+  }
 
   const cacheKey = generateCacheKey(
     errorMessage,
     codeSnippet,
     language,
-    primaryProvider,
+    apiFormat === "openai-compatible" ? baseUrl : apiFormat,
+    model,
   );
-
   const cached = responseCache.get(cacheKey);
   if (cached) {
     return cached;
   }
 
-  const attempts = buildProviderList();
+  const prompt = buildPrompt(errorMessage, codeSnippet, language);
 
-  if (attempts.length === 0) {
+  try {
+    let result: AIExplanation;
+
+    switch (apiFormat) {
+      case "gemini":
+        result = await callGemini(apiKey, model, prompt);
+        break;
+      case "anthropic":
+        result = await callAnthropic(apiKey, model, prompt);
+        break;
+      default:
+        result = await callOpenAICompatible(baseUrl, apiKey, model, prompt);
+    }
+
+    responseCache.set(cacheKey, result);
+    return result;
+  } catch (error) {
     return {
-      summary: "API key not set.",
-      why:
-        'Go to Settings and set "AI Error Explainer: Api Key" for your chosen provider (' +
-        primaryProvider +
-        ").",
-      fix: "Get a key from openrouter.ai, platform.openai.com, aistudio.google.com, console.anthropic.com, or platform.deepseek.com.",
+      summary: "No response was received from the AI.",
+      why: String(error),
+      fix: "Check your API key, Base URL, and internet connection.",
     };
   }
-
-  const prompt = buildPrompt(errorMessage, codeSnippet, language);
-  const attemptsToTry =
-    enableFallback === false ? [attempts[0]] : attempts;
-
-  let lastError = "";
-
-  for (const attempt of attemptsToTry) {
-    const fn = providerFunctions[attempt.name];
-    if (!fn) {
-      continue;
-    }
-
-    try {
-      const result = await fn(attempt.apiKey, prompt);
-      responseCache.set(cacheKey, result);
-      return result;
-    } catch (error) {
-      lastError = "[" + attempt.name + "] " + String(error);
-    }
-  }
-
-  return {
-    summary: "All configured AI providers failed.",
-    why: lastError || "Unknown error.",
-    fix: "Check your API keys, or wait for rate limits to reset.",
-  };
 }

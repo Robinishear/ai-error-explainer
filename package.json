@@ -24,34 +24,35 @@
     "configuration": {
       "title": "AI Error Explainer",
       "properties": {
-        "aiErrorExplainer.provider": {
+        "aiErrorExplainer.apiFormat": {
           "type": "string",
           "enum": [
-            "openrouter",
-            "openai",
+            "openai-compatible",
             "gemini",
-            "anthropic",
-            "deepseek"
+            "anthropic"
           ],
           "enumDescriptions": [
-            "OpenRouter (access any model, free or paid)",
-            "OpenAI (GPT models)",
-            "Google Gemini",
-            "Anthropic (Claude)",
-            "DeepSeek"
+            "Works with OpenAI, DeepSeek, Groq, Mistral, OpenRouter, Together, xAI, and most other providers",
+            "Google Gemini (different format)",
+            "Anthropic Claude (different format)"
           ],
-          "default": "openrouter",
-          "description": "Which AI provider to use — pick based on which API key you have"
+          "default": "openai-compatible",
+          "description": "Which API format your provider uses"
+        },
+        "aiErrorExplainer.baseUrl": {
+          "type": "string",
+          "default": "https://openrouter.ai/api/v1/chat/completions",
+          "description": "Only used when API Format = openai-compatible. The full endpoint URL for your provider (e.g. https://api.groq.com/openai/v1/chat/completions)"
+        },
+        "aiErrorExplainer.model": {
+          "type": "string",
+          "default": "nvidia/nemotron-3.5-lightning:free",
+          "description": "The model name your provider expects (e.g. gpt-4o-mini, llama-3.3-70b-versatile, deepseek-chat)"
         },
         "aiErrorExplainer.apiKey": {
           "type": "string",
           "default": "",
-          "description": "Your API key for the selected provider above"
-        },
-        "aiErrorExplainer.openrouterModel": {
-          "type": "string",
-          "default": "nvidia/nemotron-3.5-lightning:free",
-          "description": "Only used when provider = openrouter. Any OpenRouter model ID (e.g. openai/gpt-4o, anthropic/claude-3.5-sonnet, deepseek/deepseek-chat)"
+          "description": "Your API key for the configured provider"
         },
         "aiErrorExplainer.language": {
           "type": "string",
@@ -101,36 +102,6 @@
           ],
           "default": "English",
           "description": "Which language should the AI explanation be displayed in?"
-        },
-        "aiErrorExplainer.enableFallback": {
-          "type": "boolean",
-          "default": true,
-          "description": "If the primary provider fails or hits a rate limit, automatically try other providers with keys configured below"
-        },
-        "aiErrorExplainer.openrouterApiKey": {
-          "type": "string",
-          "default": "",
-          "description": "(Optional, for fallback) Your OpenRouter API key"
-        },
-        "aiErrorExplainer.openaiApiKey": {
-          "type": "string",
-          "default": "",
-          "description": "(Optional, for fallback) Your OpenAI API key"
-        },
-        "aiErrorExplainer.geminiApiKey": {
-          "type": "string",
-          "default": "",
-          "description": "(Optional, for fallback) Your Gemini API key"
-        },
-        "aiErrorExplainer.anthropicApiKey": {
-          "type": "string",
-          "default": "",
-          "description": "(Optional, for fallback) Your Anthropic API key"
-        },
-        "aiErrorExplainer.deepseekApiKey": {
-          "type": "string",
-          "default": "",
-          "description": "(Optional, for fallback) Your DeepSeek API key"
         }
       }
     }
