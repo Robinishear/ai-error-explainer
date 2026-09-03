@@ -44,11 +44,11 @@
           "default": "https://openrouter.ai/api/v1/chat/completions",
           "description": "Only used when API Format = openai-compatible. The full endpoint URL for your provider (e.g. https://api.groq.com/openai/v1/chat/completions)"
         },
-        "aiErrorExplainer.model": {
-          "type": "string",
-          "default": "nvidia/nemotron-3.5-lightning:free",
-          "description": "The model name your provider expects (e.g. gpt-4o-mini, llama-3.3-70b-versatile, deepseek-chat)"
-        },
+     "aiErrorExplainer.model": {
+  "type": "string",
+  "default": "",
+  "description": "The model name your provider expects (e.g. gpt-4o-mini, llama-3.3-70b-versatile, deepseek-chat). Leave empty to use the default free OpenRouter model."
+},
         "aiErrorExplainer.apiKey": {
           "type": "string",
           "default": "",

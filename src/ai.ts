@@ -94,6 +94,8 @@ async function callOpenAICompatible(
   model: string,
   prompt: string,
 ): Promise<AIExplanation> {
+  const effectiveModel = model || "nvidia/nemotron-3.5-lightning:free";
+
   const response = await fetch(baseUrl, {
     method: "POST",
     headers: {
@@ -101,7 +103,7 @@ async function callOpenAICompatible(
       Authorization: "Bearer " + apiKey,
     },
     body: JSON.stringify({
-      model: model,
+      model: effectiveModel,
       messages: [{ role: "user", content: prompt }],
     }),
   });
@@ -123,6 +125,7 @@ async function callOpenAICompatible(
 
 //  Google Gemini (different format, needs its own function) 
 
+// Fix — callGemini
 async function callGemini(
   apiKey: string,
   model: string,
@@ -133,7 +136,7 @@ async function callGemini(
     "https://generativelanguage.googleapis.com/v1beta/models/" +
     geminiModel +
     ":generateContent?key=" +
-    apiKey;
+    encodeURIComponent(apiKey);
 
   const response = await fetch(url, {
     method: "POST",
@@ -168,7 +171,7 @@ async function callGemini(
   return parseAIText(result.candidates[0].content.parts[0].text);
 }
 
-// ---------- Anthropic Claude (different format, needs its own function) ----------
+// Fix — callAnthropic
 async function callAnthropic(
   apiKey: string,
   model: string,
@@ -204,28 +207,25 @@ async function callAnthropic(
   return parseAIText(result.content[0].text);
 }
 
-// ---------- Main entry point ----------
+//fix  Main entry point explainError
 export async function explainError(
   errorMessage: string,
   codeSnippet: string,
   language: string,
 ): Promise<AIExplanation> {
   const config = vscode.workspace.getConfiguration("aiErrorExplainer");
-  const apiKey = config.get<string>("apiKey");
+  // const apiKey = config.get<string>("apiKey");
+  const apiKey = (config.get<string>("apiKey") || "").trim();
   const apiFormat = config.get<string>("apiFormat") || "openai-compatible";
   const baseUrl =
     config.get<string>("baseUrl") ||
     "https://openrouter.ai/api/v1/chat/completions";
+
   // const model =
   //   config.get<string>("model") || "nvidia/nemotron-3.5-lightning:free";
 
   //  fix  new code
-  const rawModel = config.get<string>("model") || "";
-  const model =
-    rawModel ||
-    (apiFormat === "openai-compatible"
-      ? "nvidia/nemotron-3.5-lightning:free"
-      : "");
+const model = config.get<string>("model") || "";
 
   if (!apiKey) {
     return {
