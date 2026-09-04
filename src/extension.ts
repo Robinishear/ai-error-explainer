@@ -25,7 +25,6 @@ export function activate(context: vscode.ExtensionContext) {
   );
   context.subscriptions.push(helloDisposable);
 
-  // ---------- Command to open the diagnosis panel ----------
   const showPanelDisposable = vscode.commands.registerCommand(
     "ai-error-explainer.showPanel",
     (explanationJson: string) => {

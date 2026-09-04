@@ -1,26 +1,9 @@
 import * as vscode from "vscode";
-
-export interface AIExplanation {
-  summary: string;
-  why: string;
-  fix: string;
-}
-
-interface OpenAIStyleResponse {
-  choices: { message: { content: string } }[];
-}
-
-interface GeminiResponse {
-  candidates: { content: { parts: { text: string }[] } }[];
-}
-
-interface AnthropicResponse {
-  content: { text: string }[];
-}
-
-interface ErrorResponse {
-  error: { message: string; code?: number };
-}
+import { AIExplanation } from "./interface/AIExplanation";
+import { OpenAIStyleResponse } from "./interface/OpenAIStyleResponse";
+import { GeminiResponse } from "./interface/GeminiResponse";
+import { AnthropicResponse } from "./interface/AnthropicResponse";
+import { ErrorResponse } from "./interface/ErrorResponse";
 
 // ---------- Caching ----------
 // Session-only cache: cleared when VS Code restarts, never written to disk.
@@ -177,7 +160,8 @@ async function callAnthropic(
   model: string,
   prompt: string,
 ): Promise<AIExplanation> {
-  const claudeModel = model || "claude-3-5-sonnet-20241022";
+  // const claudeModel = model || "claude-3-5-sonnet-20241022";
+  const claudeModel = model || "claude-haiku-4-5-20251001";
 
   const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",

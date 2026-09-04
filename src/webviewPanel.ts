@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
-import type { AIExplanation } from "./ai";
+import { AIExplanation } from "./interface/AIExplanation";
+// import type { AIExplanation } from "./ai";
 
 let currentPanel: vscode.WebviewPanel | undefined;
 let extensionUri: vscode.Uri;
