@@ -34,7 +34,6 @@ Hover over any error or warning to get a clear, plain-language diagnosis of what
 
 ## 🎬 Demo
 
-https://github.com/user-attachments/assets/c96ee44a-e554-4d8e-9f57-f70f31548828
 
 > 📹 *Demo video coming soon — showing the extension in action from error to explanation.*
 
