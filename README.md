@@ -31,10 +31,8 @@ Hover over any error or warning to get a clear, plain-language diagnosis of what
 
 ## 🎬 Demo
 
-
-  Add your demo video or GIF here once recorded. Example:
-  https://github.com/user-attachments/assets/your-video-id
-  or embed a GIF: ![Demo](media/demo.gif)
+https://github.com/Robinishear/AI-Error-Explainer-Demo-video  
+or embed a GIF: ![Demo](media/demo.gif)
 
 
 > 📹 *Demo video coming soon — showing the extension in action from error to explanation.*
@@ -397,6 +395,6 @@ MIT — free to use, modify, and share. See the LICENSE file included with this 
 
 ## 👤 Author
 
-Built by **Robin Ahmed**, a full-stack developer from Bangladesh.
+Built by **Robin Ryan**, a full-stack developer from Bangladesh.
 
 If you run into an issue or have a feature request, feel free to leave a review or rating on the Marketplace listing — feedback helps shape future updates.
