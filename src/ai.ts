@@ -69,8 +69,7 @@ function isErrorResponse(data: unknown): data is ErrorResponse {
 }
 
 //  Universal caller for any OpenAI-compatible provider 
-// Works with: OpenAI, DeepSeek, Groq, Mistral, OpenRouter, Together, xAI,
-// Fireworks, Cerebras, Perplexity, Ollama (local), and most others.
+
 async function callOpenAICompatible(
   baseUrl: string,
   apiKey: string,
@@ -102,8 +101,19 @@ async function callOpenAICompatible(
     };
   }
 
+  
+
   const result = data as OpenAIStyleResponse;
   return parseAIText(result.choices[0].message.content);
+
+  // Fix — handle unexpected response format
+  // if (!result.choices || !result.choices[0]) {
+  //   return {
+  //     summary: "Unexpected response format from provider.",
+  //     why: JSON.stringify(data).slice(0, 300),
+  //     fix: "This provider's response format may differ from standard OpenAI format.",
+  //   };
+  // }
 }
 
 //  Google Gemini (different format, needs its own function) 
