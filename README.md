@@ -1,3 +1,6 @@
+
+
+
 # 🤖 AI Error Explainer
 
 **AI-powered error explanations, right inside VS Code.**
