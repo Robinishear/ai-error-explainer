@@ -31,7 +31,7 @@ Hover over any error or warning to get a clear, plain-language diagnosis of what
 
 ## 🎬 Demo
 
-<video src="https://github.com/user-attachments/assets/2ffaed49-b1a9-429c-89a4-1542796a6080" controls width="100%"></video>
+https://github.com/user-attachments/assets/2ffaed49-b1a9-429c-89a4-1542796a6080
 
 > 📹 *Demo video coming soon — showing the extension in action from error to explanation.*
 
