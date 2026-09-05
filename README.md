@@ -31,8 +31,7 @@ Hover over any error or warning to get a clear, plain-language diagnosis of what
 
 ## 🎬 Demo
 
-<video src="https://raw.githubusercontent.com/Robinishear/AI-Error-Explainer-Demo-video/main/media/demo.mp4" controls width="100%"></video>
-
+<video src="https://github.com/user-attachments/assets/2ffaed49-b1a9-429c-89a4-1542796a6080" controls width="100%"></video>
 
 > 📹 *Demo video coming soon — showing the extension in action from error to explanation.*
 
