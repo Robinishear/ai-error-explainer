@@ -3,7 +3,7 @@
   "publisher": "robinishear",
   "displayName": "ai-error-explainer",
   "description": "AI-powered error explanations on hover",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "icon": "icon.png",
   "engines": {
     "vscode": "^1.133.0"
@@ -11,7 +11,9 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
